@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speech Emotion Detection</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      background: #1e1e2f;
+      padding: 3rem;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    h1, h2 {
+      margin-bottom: 20px;
+    }
+
+    input[type="email"], input[type="password"], input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 8px;
+      background: #333;
+      color: #fff;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #bb86fc;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+    }
+
+    button:hover {
+      background: #6200ea;
+      transform: scale(1.05);
+    }
+
+    a {
+      color: #bb86fc;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="title-page">
+    <h1>Welcome to Speech Emotion Detection</h1>
+    <p>Detect and analyze emotions from speech with advanced AI.</p>
+    <button onclick="showHomePage()">Get Started</button>
+  </div>
+
+  <div class="container" id="home-page" style="display: none;">
+    <h2>Sign In</h2>
+    <input type="email" placeholder="Email" id="email">
+    <input type="password" placeholder="Password" id="password">
+    <button onclick="signIn()">Sign In</button>
+    <p>Don’t have an account? <a onclick="showSignUp()">Sign Up</a></p>
+  </div>
+
+  <div class="container" id="main-page" style="display: none;">
+    <h2>Upload Your Voice File</h2>
+    <input type="file" accept="audio/*">
+    <button onclick="uploadFile()">Upload</button>
+    <a onclick="showHomePage()">Go Back to Home</a>
+  </div>
+
+  <script>
+    function showHomePage() {
+      document.getElementById('title-page').style.display = 'none';
+      document.getElementById('home-page').style.display = 'block';
+      document.getElementById('main-page').style.display = 'none';
+    }
+
+    function showSignUp() {
+      document.getElementById('home-page').innerHTML = `
+        <h2>Sign Up</h2>
+        <input type="email" placeholder="Email" id="email">
+        <input type="password" placeholder="Password" id="password">
+        <button onclick="signUp()">Sign Up</button>
+        <p>Already have an account? <a onclick="showSignIn()">Sign In</a></p>
+      `;
+    }
+
+    function showSignIn() {
+      showHomePage();
+    }
+
+    function signIn() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      if (email && password) {
+        showMainPage();
+      } else {
+        alert('Please fill in both fields.');
+      }
+    }
+
+    function signUp() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      if (email && password) {
+        alert('Account created successfully! Redirecting to main page...');
+        showMainPage();
+      } else {
+        alert('Please fill in both fields.');
+      }
+    }
+
+    function showMainPage() {
+      document.getElementById('title-page').style.display = 'none';
+      document.getElementById('home-page').style.display = 'none';
+      document.getElementById('main-page').style.display = 'block';
+    }
+
+    function uploadFile() {
+      alert('File uploaded successfully! Emotion detection will start soon.');
+    }
+  </script>
+</body>
+</html>
