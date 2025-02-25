@@ -13,17 +13,6 @@ model = joblib.load("emotion_model.pkl")
 scaler = joblib.load("scaler.pkl")
 label_encoder = joblib.load("label_encoder.pkl")
 
-# Define label mapping (adjust as per your dataset labels)
-label_map = {
-    "A": "Angry",
-    "H": "Happy",
-    "S": "Sad",
-    "N": "Neutral",
-    "D": "Disgust",
-    "F": "Fear",
-    "U": "Surprise"
-}
-
 # Define upload folder
 UPLOAD_FOLDER = "uploads"
 if not os.path.exists(UPLOAD_FOLDER):
@@ -31,13 +20,22 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-def extract_features(audio_path):
-    """ Extracts features from an audio file for emotion classification. """
+def extract_features(audio_file):
+    """ Extracts 153 MFCC features from an audio file for emotion classification. """
     try:
-        audio, sr = librosa.load(audio_path, sr=None)
-        mfccs = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=40)
-        mfccs_scaled = np.mean(mfccs.T, axis=0)  # Take mean of MFCCs
-        return mfccs_scaled
+        # Load audio file with the correct sampling rate
+        y, sr = librosa.load(audio_file, sr=16000)
+
+        # Extract MFCC features (153 MFCC coefficients)
+        mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=153)
+        
+        # Ensure the output has exactly 153 features
+        if mfccs.shape[0] != 153:
+            raise ValueError(f"Expected 153 MFCCs, but got {mfccs.shape[0]}")
+
+        mfccs = np.mean(mfccs, axis=1)  # Take the mean of MFCCs across time frames
+
+        return mfccs
     except Exception as e:
         print(f"Error extracting features: {e}")
         return None
@@ -68,9 +66,8 @@ def predict():
     # Predict emotion
     prediction = model.predict(features)
     predicted_label = label_encoder.inverse_transform(prediction)[0]
-    predicted_emotion = label_map.get(predicted_label, "Unknown")
 
-    return jsonify({"emotion": predicted_emotion})
+    return jsonify({"emotion": predicted_label})
 
 if __name__ == "__main__":
     app.run(debug=True)

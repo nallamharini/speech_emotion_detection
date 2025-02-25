@@ -38,11 +38,11 @@ model.fit(X_train, y_train)
 # Model Evaluation
 y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
-print(f"✅ Model Accuracy: {accuracy:.2f}")
+print(f"Model Accuracy: {accuracy:.2f}")
 
 # Print classification report
 print(classification_report(y_test, y_pred))
 
 # Save trained model
 joblib.dump(model, "emotion_model.pkl")
-print("✅ Model saved as 'emotion_model.pkl'")
+print("Model saved as 'emotion_model.pkl'")
