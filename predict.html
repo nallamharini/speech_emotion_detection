@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: #2a2a2a;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            animation: slideIn 0.5s ease-in-out;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        #prediction-result {
+            font-size: 2em;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        button {
+            padding: 10px 20px;
+            background: #00ffff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #00ffff;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prediction Result</h1>
+        <p id="prediction-result">Emotion: <span id="emotion"></span></p>
+        <button onclick="window.location.href='index.html'">Back</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const emotion = sessionStorage.getItem('emotion') || 'Unknown';
+            console.log("Loaded predict.html with emotion:", emotion);
+            document.getElementById('emotion').textContent = emotion;
+            sessionStorage.removeItem('emotion');
+        });
+    </script>
+</body>
+</html>

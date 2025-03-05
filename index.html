@@ -46,30 +46,9 @@
             transform: scale(1.1);
             box-shadow: 0 0 15px #00ffff;
         }
-        #prediction-page {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            justify-content: center;
-            align-items: center;
-            animation: slideIn 0.5s ease-in-out;
-        }
-        #prediction-result {
-            font-size: 2em;
-            color: #00ffff;
-            text-shadow: 0 0 10px #00ffff;
-        }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
-        }
-        @keyframes slideIn {
-            from { transform: translateY(-100%); }
-            to { transform: translateY(0); }
         }
         .particles {
             position: absolute;
@@ -98,16 +77,8 @@
         <label for="audio-upload">Upload Audio File</label>
         <input type="file" id="audio-upload" accept="audio/*">
     </div>
-    <div id="prediction-page">
-        <div class="container">
-            <h1>Prediction Result</h1>
-            <p id="prediction-result">Emotion: <span id="emotion"></span></p>
-            <button onclick="backToMain()" style="padding: 10px 20px; background: #00ffff; color: #1a1a1a; border: none; border-radius: 25px; cursor: pointer;">Back</button>
-        </div>
-    </div>
 
     <script>
-        // Dynamic particle animation
         function createParticle() {
             const particle = document.createElement('div');
             particle.className = 'particle';
@@ -121,30 +92,42 @@
         }
         setInterval(createParticle, 200);
 
-        // File upload and prediction
         document.getElementById('audio-upload').addEventListener('change', async (event) => {
             const file = event.target.files[0];
-            if (!file) return;
+            if (!file) {
+                console.log("No file selected");
+                return;
+            }
+            console.log("File selected:", file.name);
 
             const formData = new FormData();
             formData.append('audio', file);
 
-            const response = await fetch('http://localhost:5000/predict', {
-                method: 'POST',
-                body: formData
-            });
-            const result = await response.json();
+            try {
+                console.log("Sending request to http://127.0.0.1:5000/predict");
+                const response = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                console.log("Response status:", response.status);
+                console.log("Response headers:", [...response.headers.entries()]);
 
-            document.getElementById('emotion').textContent = result.emotion;
-            document.querySelector('.container').style.display = 'none';
-            document.getElementById('prediction-page').style.display = 'flex';
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server error ${response.status}: ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log("Prediction result:", result);
+
+                sessionStorage.setItem('emotion', result.emotion);
+                console.log("Redirecting to predict.html");
+                window.location.href = 'predict.html';
+            } catch (error) {
+                console.error("Error during prediction:", error.message, error.stack);
+                alert("Failed to get prediction. Check console for details.");
+            }
         });
-
-        function backToMain() {
-            document.getElementById('prediction-page').style.display = 'none';
-            document.querySelector('.container').style.display = 'block';
-            document.getElementById('audio-upload').value = '';
-        }
     </script>
 </body>
 </html>
