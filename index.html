@@ -5,81 +5,267 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speech Emotion Recognition</title>
     <style>
-        /* [Unchanged styles from your original file] */
+        :root {
+            --primary: #00ffff;
+            --primary-dark: #00cccc;
+            --bg-dark: #1a1a1a;
+            --bg-light: #2a2a2a;
+            --text-light: #ffffff;
+            --text-dark: #1a1a1a;
+            --success: #00ff7f;
+            --warning: #ffcc00;
+            --danger: #ff4d4d;
+        }
+        
         body {
             margin: 0;
             font-family: 'Arial', sans-serif;
-            background: #1a1a1a;
-            color: #ffffff;
-            overflow: hidden;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
         }
+        
         .container {
             text-align: center;
             padding: 40px;
-            background: #2a2a2a;
+            background: var(--bg-light);
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
             animation: fadeIn 1s ease-in-out;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            z-index: 10;
         }
+        
         h1 {
             font-size: 2.5em;
             margin-bottom: 20px;
-            color: #00ffff;
-            text-shadow: 0 0 10px #00ffff;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
         }
-        input[type="file"] {
-            display: none;
+        
+        .option-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
         }
-        label {
+        
+        button, label.btn {
             display: inline-block;
             padding: 15px 30px;
-            background: #00ffff;
-            color: #1a1a1a;
+            background: var(--primary);
+            color: var(--text-dark);
+            border: none;
             border-radius: 25px;
             cursor: pointer;
             transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: bold;
+            font-size: 1em;
         }
-        label:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 15px #00ffff;
+        
+        button:hover, label.btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--primary);
         }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        #record-btn.recording {
+            background: var(--danger);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .status-area {
+            margin: 20px 0;
+            min-height: 50px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .visualizer {
+            width: 100%;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        #canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .result-box {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .emotion-display {
+            font-size: 2em;
+            margin: 15px 0;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--primary);
+        }
+        
+        .audio-controls {
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .audio-controls.show {
+            display: block;
+        }
+        
+        progress {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        progress::-webkit-progress-bar {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+        
+        progress::-webkit-progress-value {
+            background-color: var(--primary);
+            border-radius: 5px;
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
         .particles {
-            position: absolute;
+            position: fixed;
             width: 100%;
             height: 100%;
+            top: 0;
+            left: 0;
             pointer-events: none;
+            z-index: 1;
         }
+        
         .particle {
             position: absolute;
-            background: #00ffff;
+            background: var(--primary);
             border-radius: 50%;
             opacity: 0.5;
             animation: float 5s infinite;
         }
+        
         @keyframes float {
             0% { transform: translateY(0); opacity: 0.5; }
             50% { opacity: 1; }
             100% { transform: translateY(-100vh); opacity: 0; }
         }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            button, label.btn {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="particles" id="particles"></div>
+    
     <div class="container">
         <h1>Speech Emotion Recognition</h1>
-        <label for="audio-upload">Upload Audio File</label>
-        <input type="file" id="audio-upload" accept="audio/*">
+        
+        <div class="visualizer">
+            <canvas id="canvas"></canvas>
+        </div>
+        
+        <div class="status-area" id="status">
+            Ready to detect emotions from your voice
+        </div>
+        
+        <div class="option-buttons">
+            <button id="record-btn">Start Recording</button>
+            <label for="audio-upload" class="btn">Upload Audio</label>
+            <input type="file" id="audio-upload" accept="audio/*">
+            <button id="play-btn" disabled>Play Audio</button>
+        </div>
+        
+        <progress id="upload-progress" value="0" max="100" style="display: none;"></progress>
+        
+        <div class="result-box" id="result-box">
+            <h2>Detected Emotion</h2>
+            <div class="emotion-display" id="emotion-display"></div>
+            <div class="audio-controls" id="audio-controls">
+                <audio id="audio-playback" controls></audio>
+            </div>
+        </div>
     </div>
 
     <script>
+        // DOM Elements
+        const recordBtn = document.getElementById('record-btn');
+        const playBtn = document.getElementById('play-btn');
+        const audioUpload = document.getElementById('audio-upload');
+        const statusArea = document.getElementById('status');
+        const resultBox = document.getElementById('result-box');
+        const emotionDisplay = document.getElementById('emotion-display');
+        const audioControls = document.getElementById('audio-controls');
+        const audioPlayback = document.getElementById('audio-playback');
+        const canvas = document.getElementById('canvas');
+        const uploadProgress = document.getElementById('upload-progress');
+        const ctx = canvas.getContext('2d');
+        
+        // Global variables
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob;
+        let audioStream;
+        let isRecording = false;
+        let animationId;
+        let analyser;
+        let dataArray;
+        
+        // Particle animation
         function createParticle() {
             const particle = document.createElement('div');
             particle.className = 'particle';
@@ -87,48 +273,256 @@
             particle.style.width = `${size}px`;
             particle.style.height = `${size}px`;
             particle.style.left = `${Math.random() * 100}vw`;
+            particle.style.top = `${Math.random() * 100}vh`;
             particle.style.animationDuration = `${Math.random() * 3 + 2}s`;
             document.getElementById('particles').appendChild(particle);
             setTimeout(() => particle.remove(), 5000);
         }
+        
+        // Create particles periodically
         setInterval(createParticle, 200);
-
-        document.getElementById('audio-upload').addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (!file) {
-                console.log("No file selected");
-                return;
-            }
-            console.log("File selected:", file.name);
-
-            const formData = new FormData();
-            formData.append('audio', file);
-
-            try {
-                console.log("Sending request to http://127.0.0.1:5000/predict");
-                const response = await fetch('http://127.0.0.1:5000/predict', {
-                    method: 'POST',
-                    body: formData
-                });
-                console.log("Response status:", response.status);
-                console.log("Response headers:", [...response.headers.entries()]);
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Server error ${response.status}: ${errorText}`);
-                }
-
-                const result = await response.json();
-                console.log("Prediction result:", result);
-
-                sessionStorage.setItem('emotion', result.emotion);
-                console.log("Redirecting to predict.html");
-                window.location.href = 'predict.html';
-            } catch (error) {
-                console.error("Error during prediction:", error.message, error.stack);
-                alert("Failed to get prediction. Check console for details.");
+        
+        // Start or stop recording
+        recordBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
             }
         });
+        
+        // Audio upload handling
+        audioUpload.addEventListener('change', handleAudioUpload);
+        
+        // Play recorded audio
+        playBtn.addEventListener('click', () => {
+            if (audioBlob) {
+                const audioURL = URL.createObjectURL(audioBlob);
+                audioPlayback.src = audioURL;
+                audioPlayback.play();
+            }
+        });
+        
+        // Start recording function
+        async function startRecording() {
+            try {
+                audioChunks = [];
+                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // Set up audio context for visualization
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(audioStream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                source.connect(analyser);
+                
+                // Set up data array for visualization
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                // Start visualizing
+                visualize();
+                
+                // Set up media recorder
+                mediaRecorder = new MediaRecorder(audioStream);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    sendAudioForAnalysis(audioBlob);
+                    playBtn.disabled = false;
+                };
+                
+                // Start recording
+                mediaRecorder.start();
+                isRecording = true;
+                recordBtn.textContent = 'Stop Recording';
+                recordBtn.classList.add('recording');
+                updateStatus('Recording in progress...');
+                
+            } catch (error) {
+                console.error('Error starting recording:', error);
+                updateStatus('Error accessing microphone: ' + error.message);
+            }
+        }
+        
+        // Stop recording function
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                audioStream.getTracks().forEach(track => track.stop());
+                cancelAnimationFrame(animationId);
+                isRecording = false;
+                recordBtn.textContent = 'Start Recording';
+                recordBtn.classList.remove('recording');
+                updateStatus('Processing audio...');
+            }
+        }
+        
+        // Handle file upload
+        function handleAudioUpload(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                updateStatus('No file selected');
+                return;
+            }
+            
+            updateStatus(`File selected: ${file.name}`);
+            audioBlob = file;
+            sendAudioForAnalysis(file);
+            
+            // Create audio element for playback
+            const audioURL = URL.createObjectURL(file);
+            audioPlayback.src = audioURL;
+            playBtn.disabled = false;
+        }
+        
+        // Send audio for analysis
+        function sendAudioForAnalysis(audioData) {
+            const formData = new FormData();
+            formData.append('audio', audioData);
+            
+            updateStatus('Analyzing audio...');
+            uploadProgress.style.display = 'block';
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://127.0.0.1:5000/predict', true);
+            
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    uploadProgress.value = percentComplete;
+                }
+            };
+            
+            xhr.onload = function() {
+                uploadProgress.style.display = 'none';
+                
+                if (xhr.status === 200) {
+                    try {
+                        const result = JSON.parse(xhr.responseText);
+                        displayEmotion(result.emotion);
+                    } catch (error) {
+                        updateStatus('Error parsing response: ' + error.message);
+                    }
+                } else {
+                    updateStatus('Error: ' + xhr.statusText);
+                }
+            };
+            
+            xhr.onerror = function() {
+                uploadProgress.style.display = 'none';
+                updateStatus('Network error occurred');
+            };
+            
+            xhr.send(formData);
+        }
+        
+        // Display detected emotion
+        function displayEmotion(emotion) {
+            resultBox.classList.add('show');
+            emotionDisplay.textContent = emotion.toUpperCase();
+            audioControls.classList.add('show');
+            
+            // Set emotion color
+            switch(emotion.toLowerCase()) {
+                case 'happy':
+                    emotionDisplay.style.color = '#00ff7f';
+                    break;
+                case 'sad':
+                    emotionDisplay.style.color = '#4169e1';
+                    break;
+                case 'angry':
+                    emotionDisplay.style.color = '#ff4d4d';
+                    break;
+                case 'crying':
+                case 'sobbing':
+                    emotionDisplay.style.color = '#9370db';
+                    break;
+                default:
+                    emotionDisplay.style.color = '#00ffff';
+            }
+            
+            updateStatus('Emotion detected!');
+        }
+        
+        // Update status message
+        function updateStatus(message) {
+            statusArea.textContent = message;
+        }
+        
+        // Audio visualization
+        function visualize() {
+            // Make canvas responsive
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            function draw() {
+                animationId = requestAnimationFrame(draw);
+                
+                // Get frequency data
+                analyser.getByteFrequencyData(dataArray);
+                
+                // Clear canvas
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw frequency bars
+                const barWidth = (canvas.width / dataArray.length) * 2.5;
+                let x = 0;
+                
+                for (let i = 0; i < dataArray.length; i++) {
+                    const barHeight = dataArray[i] / 255 * canvas.height;
+                    
+                    // Create gradient
+                    const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+                    gradient.addColorStop(0, '#00ffff');
+                    gradient.addColorStop(0.5, '#00ccff');
+                    gradient.addColorStop(1, '#0099ff');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                    
+                    x += barWidth + 1;
+                }
+            }
+            
+            draw();
+        }
+        
+        // Initialize canvas size
+        function initCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', initCanvas);
+        window.addEventListener('resize', initCanvas);
+        
+        // Web Speech API for automatic speech recognition
+        if ('webkitSpeechRecognition' in window) {
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            
+            recognition.onresult = (event) => {
+                // This would be used if we wanted to display recognized text
+                // Not needed for emotion recognition from audio
+            };
+            
+            // Can be enabled if text transcription is desired
+            // document.getElementById('speech-btn').addEventListener('click', () => {
+            //     recognition.start();
+            // });
+        }
     </script>
 </body>
 </html>
