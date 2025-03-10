@@ -7,8 +7,9 @@ from tensorflow.keras.models import load_model as keras_load_model
 from sklearn.preprocessing import LabelEncoder
 
 app = Flask(__name__)
-CORS(app, resources={r"/predict": {"origins": "http://127.0.0.1:5500"}})  # Explicitly allow port 5500
+CORS(app, resources={r"/predict": {"origins": "http://localhost:8000"}})  # Allow only port 8000
 
+# Load pre-trained model and label encoder
 model = keras_load_model('emotion_model.h5')
 label_encoder = LabelEncoder()
 label_encoder.classes_ = np.load('label_encoder.npy', allow_pickle=True)
@@ -28,7 +29,7 @@ def predict():
         return jsonify({'error': 'Failed to extract features from audio'}), 400
     
     print("Features extracted:", feature_dict)
-    feature_dict.pop('emotion', None)
+    feature_dict.pop('emotion', None)  # Remove 'emotion' if present
     feature_vector = [list(feature_dict.values())]
     feature_vector = np.array(feature_vector)
     expected_features = 20

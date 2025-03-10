@@ -6,7 +6,6 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.utils import to_categorical
 from decoder import decode_features
 
-# In train_model.py
 def train_lstm_model(features, labels):
     le = LabelEncoder()
     labels_encoded = to_categorical(le.fit_transform(labels))
@@ -35,5 +34,6 @@ def load_model():
 
 if __name__ == "__main__":
     model, label_encoder = load_model()
-    model.save('emotion_model.h5')  # Model is already compiled
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])  # Recompile for metrics
+    model.save('emotion_model.h5')
     np.save('label_encoder.npy', label_encoder.classes_)

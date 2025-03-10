@@ -1,9 +1,21 @@
-# Placeholder for speech-to-text functionality (optional)
+import speech_recognition as sr
+
 def speech_to_text(audio_path):
-    print(f"Speech-to-text not implemented for {audio_path}. Returning dummy text.")
-    return "This is a placeholder text"
+    recognizer = sr.Recognizer()
+    with sr.AudioFile(audio_path) as source:
+        audio = recognizer.record(source)
+        try:
+            text = recognizer.recognize_google(audio)
+            print(f"Transcribed text: {text}")
+            return text
+        except sr.UnknownValueError:
+            print("Could not understand audio")
+            return None
+        except sr.RequestError as e:
+            print(f"Speech recognition error: {e}")
+            return None
 
 if __name__ == "__main__":
-    audio_path = "test_audio.wav"
+    audio_path = r"C:\Users\nalla\OneDrive\Desktop\speech_emotion_detection-1\audio\archive (1)\Actor_01\03-01-01-01-01-01-01.wav"
     text = speech_to_text(audio_path)
-    print(text)
+    print(f"Result: {text}")
